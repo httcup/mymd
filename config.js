@@ -9,7 +9,7 @@ const CONFIG = {
   notesDir: "notes",        // 笔记存放目录
 
   // 打开网页的临时密码（存的是 SHA-256 哈希，不是明文）
-  // 默认密码: mymd2026
+  // 当前密码: 四个空格 "    "
   // 修改方法: 浏览器控制台执行 __genHash("你的新密码")，把输出替换到这里
-  passwordHash: "fbff40522861ab45c9a3ebbeb509c019bf0bae19a3dea3721022751452967516"
+  passwordHash: "1a0f564ddc6039457b2fb26b3d6a316c15eba20a886449847c3210c35821a693"
 };
