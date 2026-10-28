@@ -4,7 +4,7 @@
 // 仓库信息
 const CONFIG = {
   owner: "httcup",          // 你的 GitHub 用户名
-  repo: "MYMD",             // 仓库名
+  repo: "mymd",             // 仓库名（全小写，与 Pages 路径一致）
   branch: "main",           // 分支
   notesDir: "notes",        // 笔记存放目录
 

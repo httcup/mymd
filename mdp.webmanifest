@@ -1,0 +1,17 @@
+{
+    "name": "随手记存为.md",
+    "short_name": "随手记",
+    "description": "零依赖 Markdown 笔记本：多本笔记、实时预览、自动保存，一键存为 .md。",
+    "icons": [
+        {
+            "src": "icon/mdp-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/mymd/",
+    "scope": "/mymd/",
+    "display": "standalone",
+    "theme_color": "#f6f7f9",
+    "background_color": "#f6f7f9"
+}

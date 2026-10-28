@@ -1,0 +1,70 @@
+/* MYMD 附加样式：临时密码门 + 云同步设置 */
+
+/* ===== 密码门 ===== */
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #eef2f7 0%, #e4ebf4 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .gate { background: linear-gradient(160deg, #16181d 0%, #1d2026 100%); }
+}
+
+.gate-card {
+  background: var(--card, #fff);
+  padding: 44px 36px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .12);
+  text-align: center;
+  width: min(340px, calc(100vw - 40px));
+}
+
+@media (prefers-color-scheme: dark) {
+  .gate-card { background: #22262d; box-shadow: 0 8px 32px rgba(0, 0, 0, .5); }
+}
+
+.gate-logo { font-size: 40px; }
+.gate-card h1 { font-size: 24px; margin: 6px 0 4px; }
+.gate-sub { opacity: .65; font-size: 14px; margin-bottom: 22px; }
+
+.gate-card input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(128, 128, 128, .35);
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 12px;
+  text-align: center;
+  background: transparent;
+  color: inherit;
+}
+.gate-card input:focus { outline: none; border-color: #2563eb; }
+.gate-btn { width: 100%; padding: 10px; }
+.gate-err { color: #dc2626; font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+/* ===== 云同步设置弹窗 ===== */
+.cfg-label {
+  display: block;
+  font-size: 13px;
+  opacity: .7;
+  margin: 14px 0 6px;
+  text-align: left;
+}
+.cfg-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(128, 128, 128, .35);
+  border-radius: 8px;
+  font-size: 14px;
+  background: transparent;
+  color: inherit;
+}
+.cfg-input:focus { outline: none; border-color: #2563eb; }
+
+/* 云同步状态文字 */
+#cloudState { color: #2563eb; }

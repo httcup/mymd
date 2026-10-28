@@ -1,95 +1,208 @@
 <!DOCTYPE html>
+<!--
+  MYMD · 小胡的笔记本 MarkDownPad
+  基于原版「随手记存为.md」复刻，叠加：临时密码门 + GitHub 仓库云同步。
+  笔记自动存在浏览器 localStorage，配置 Token 后与 GitHub 仓库 notes/ 目录双向同步。
+-->
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<title>MYMD · 我的笔记</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MYMD · 随手记存为.md</title>
+<meta name="description" content="左边写、右边看，多本笔记自动存在浏览器里，一键同步到自己的 GitHub 仓库；写完点一下就是干净的 .md 文件，也能导入已有 Markdown、一次性备份全部。">
+<link rel="canonical" href="https://httcup.github.io/mymd/">
+<meta name="theme-color" content="#f6f7f9">
+<link rel="icon" href="./icon/mdp-512.png">
+<link rel="apple-touch-icon" href="./icon/mdp-512.png">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; manifest-src 'self'; connect-src 'self' https://api.github.com; form-action 'none'; base-uri 'none'">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://httcup.github.io/mymd/">
+<meta property="og:title" content="MYMD · 随手记存为.md">
+<meta property="og:description" content="多本笔记、实时预览、自动保存本地，一键同步到自己的 GitHub 仓库，导出就是干净的 .md。">
+<link rel="manifest" href="mdp.webmanifest">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="gate.css">
 </head>
-<body>
+<body class="nb-page">
+<a class="skip-link" href="#main">跳到主要内容</a>
 
-<!-- ===== 密码门 ===== -->
-<div id="gate" class="gate">
+<!-- ===== 临时密码门 ===== -->
+<div class="gate" id="gate">
   <div class="gate-card">
-    <div class="gate-logo">📝</div>
+    <div class="gate-logo">📓</div>
     <h1>MYMD</h1>
-    <p class="gate-sub">私人笔记 · 输入密码进入</p>
-    <input type="password" id="gate-pwd" placeholder="密码" autocomplete="current-password">
-    <button id="gate-btn" class="btn btn-primary">解锁</button>
-    <p id="gate-err" class="gate-err"></p>
+    <p class="gate-sub">私人笔记本 · 输入密码进入</p>
+    <input type="password" id="gatePwd" placeholder="密码" autocomplete="current-password">
+    <button class="btn btn-primary gate-btn" id="gateBtn" type="button">解锁</button>
+    <p class="gate-err" id="gateErr"></p>
   </div>
 </div>
 
-<!-- ===== 主界面 ===== -->
-<div id="app" class="app hidden">
-  <header class="topbar">
-    <div class="topbar-left">
-      <span class="logo">📝 MYMD</span>
+<header class="hub-head">
+  <div class="head-row">
+    <p class="brand">📓 MYMD · 随手记存为.md</p>
+    <div class="head-actions">
+      <button class="icon-link" id="cloudBtn" type="button" title="立即与 GitHub 仓库同步（自动同步也会在保存后 8 秒进行）">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96ZM10 17l-3.5-3.5 1.41-1.41L10 14.17 15.18 9l1.41 1.41L10 17Z"/></svg>
+      </button>
+      <button class="icon-link qr-open" id="qrOpen" type="button" title="手机上打开：显示本站二维码，手机扫一下就在手机上继续用" aria-haspopup="dialog" aria-controls="qrPanel">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3h7v7H3V3Zm2 2v3h3V5H5Zm9-2h7v7h-7V3Zm2 2v3h3V5h-3ZM3 14h7v7H3v-7Zm2 2v3h3v-3H5Zm9-2h3v3h-3v-3Zm5 0h2v2h-2v-2Zm-5 5h2v2h-2v-2Zm3 0h4v2h-4v-2Zm2-3h2v2h-2v-2Z"/></svg>
+      </button>
+      <a class="icon-link bookmarklet" title="点一下在 600×600 小窗打开笔记本（与当前域名共用笔记）；也可拖到书签栏随时唤起"
+        href="javascript: (function(){ var u = /^(\/|\/mymd\/?|\/index\.html)$/i.test(location.pathname) ? location.origin + location.pathname : 'https://httcup.github.io/mymd/'; window.open(u, 'window', 'width=600,height=600'); })()">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.2L5 21V4a1 1 0 0 1 1-1Z"/></svg>
+      </a>
     </div>
-    <div class="topbar-right">
-      <span id="save-status" class="save-status"></span>
-      <button id="btn-new" class="btn btn-primary">＋ 新笔记</button>
-      <button id="btn-settings" class="btn btn-ghost" title="设置">⚙️</button>
-      <button id="btn-lock" class="btn btn-ghost" title="锁定">🔒</button>
-    </div>
-  </header>
+  </div>
+  <h1>MYMD · 随手记存为.md</h1>
+  <p class="lede">左边记事，右边就是最终样子；每敲一句都自动留在浏览器里，配好 Token 后还会一键同步到你的 GitHub 仓库（云端双向同步，换设备也在）。写完点「下载 .md」，得到一份直接能丢进 Obsidian、Typora 或仓库的纯文本笔记。</p>
+</header>
 
-  <main class="layout">
-    <!-- 侧栏：笔记列表 -->
-    <aside class="sidebar">
-      <div class="sidebar-head">笔记列表</div>
-      <ul id="note-list" class="note-list"></ul>
-      <div id="list-loading" class="list-loading">加载中…</div>
+<main id="main" class="tool-main">
+
+  <section class="nb-app" aria-label="Markdown 笔记本">
+    <aside class="nb-side" aria-label="笔记列表">
+      <div class="nb-side-head">
+        <button class="nb-new" id="newNote" type="button">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          新建笔记
+        </button>
+        <label class="nb-search">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.2 16.2 4.3 4.3"/></svg>
+          <input id="q" type="search" placeholder="搜索标题或内容" aria-label="搜索笔记" autocomplete="off">
+        </label>
+      </div>
+      <ul class="nb-notes" id="noteList"></ul>
+      <p class="nb-empty" id="noteEmpty" hidden>还没有匹配的笔记</p>
+      <div class="nb-side-foot">
+        <button class="nb-ghost" id="importBtn" type="button">导入 .md</button>
+        <button class="nb-ghost" id="exportAll" type="button">备份全部</button>
+        <button class="nb-ghost" id="exportJson" type="button" title="含标题、时间、置顶，导入时原样恢复">备份 JSON</button>
+        <button class="nb-ghost" id="trashBtn" type="button" aria-pressed="false">回收站</button>
+        <input id="file" type="file" accept=".md,.markdown,.txt,.json,text/markdown,text/plain,application/json" multiple hidden>
+      </div>
+      <div class="nb-side-foot" id="trashOps" hidden>
+        <button class="nb-ghost" id="emptyTrash" type="button">清空回收站</button>
+      </div>
     </aside>
 
-    <!-- 编辑区 -->
-    <section class="editor-area">
-      <div id="welcome" class="welcome">
-        <h2>欢迎使用 MYMD 👋</h2>
-        <p>笔记以明文 Markdown 保存在你的 GitHub 仓库 <code id="welcome-repo"></code> 的 <code>notes/</code> 目录里。</p>
-        <p>左侧选择一篇笔记，或点右上角「＋ 新笔记」开始写。</p>
-        <p class="welcome-tip">⚠️ 保存到 GitHub 需要先在设置里填入你的 Personal Access Token（仅保存在本机浏览器）。</p>
+    <section class="nb-editor" aria-label="编辑与预览">
+      <div class="nb-bar">
+        <div class="nb-bar-toggles">
+          <button class="btn btn-icon" id="sideToggle" type="button" title="收起 / 展开左侧笔记列表" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+          <button class="btn btn-icon btn-prev" id="prevToggle" type="button" title="收起 / 展开右侧实时预览" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+            预览
+          </button>
+        </div>
+        <input id="title" class="nb-title" placeholder="无标题笔记" aria-label="笔记标题" autocomplete="off" spellcheck="false">
+        <span class="nb-state" id="cloudState" aria-live="polite"></span>
+        <span class="nb-state" id="state" aria-live="polite">已保存</span>
+        <div class="nb-actions">
+          <button class="btn btn-pin" id="pin" type="button" aria-pressed="false" title="置顶这本笔记，会一直排在列表最上面">置顶</button>
+          <button class="btn btn-primary" id="download" type="button">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg>
+            下载 .md
+          </button>
+          <button class="btn" id="copy" type="button">复制</button>
+          <button class="btn btn-quiet" id="remove" type="button">删除</button>
+          <button class="btn btn-quiet" id="lockBtn" type="button" title="锁定，回到密码页">🔒</button>
+        </div>
       </div>
 
-      <div id="editor" class="editor hidden">
-        <div class="editor-toolbar">
-          <input id="note-title" class="note-title" placeholder="笔记标题">
-          <div class="editor-actions">
-            <button id="btn-preview" class="btn btn-ghost">预览</button>
-            <button id="btn-delete" class="btn btn-ghost" title="删除这篇笔记">🗑️</button>
-            <button id="btn-save" class="btn btn-primary">保存</button>
+      <div class="nb-views" role="tablist" aria-label="视图切换">
+        <button class="nb-view is-on" type="button" role="tab" aria-selected="true" data-view="write">编辑</button>
+        <button class="nb-view" type="button" role="tab" aria-selected="false" data-view="read">预览</button>
+      </div>
+
+      <div class="nb-split" id="split" data-view="write">
+        <div class="nb-pane nb-write">
+          <div class="nb-tools" id="toolbar" role="toolbar" aria-label="插入 Markdown 语法">
+            <button type="button" data-md="h2" title="二级标题">H2</button>
+            <button type="button" data-md="h3" title="三级标题">H3</button>
+            <span class="nb-sep" aria-hidden="true"></span>
+            <button type="button" data-md="bold" title="粗体（⌘/Ctrl + B）"><b>B</b></button>
+            <button type="button" data-md="italic" title="斜体（⌘/Ctrl + I）"><i>I</i></button>
+            <button type="button" data-md="strike" title="删除线"><s>S</s></button>
+            <button type="button" data-md="code" title="行内代码">代码</button>
+            <span class="nb-sep" aria-hidden="true"></span>
+            <button type="button" data-md="ul" title="无序列表">列表</button>
+            <button type="button" data-md="ol" title="有序列表">编号</button>
+            <button type="button" data-md="task" title="待办清单">待办</button>
+            <button type="button" data-md="quote" title="引用">引用</button>
+            <span class="nb-sep" aria-hidden="true"></span>
+            <button type="button" data-md="link" title="链接（⌘/Ctrl + K）">链接</button>
+            <button type="button" data-md="table" title="插入表格">表格</button>
+            <button type="button" data-md="codeblock" title="代码块">代码块</button>
+            <button type="button" data-md="hr" title="分割线">分割</button>
           </div>
+          <textarea id="src" spellcheck="false" aria-label="Markdown 正文"
+            placeholder="在这里写点什么……&#10;&#10;支持 # 标题、**粗体**、- 列表、> 引用、| 表格 |、``` 代码块 ```&#10;&#10;提示：笔记自动保存在这台设备的浏览器里；在 ⚙️ 设置里配好 GitHub Token 后，还会自动同步到你的仓库，换设备打开也在。"></textarea>
         </div>
-        <div class="editor-body">
-          <textarea id="note-content" placeholder="# 开始写作…&#10;&#10;支持 Markdown 语法"></textarea>
-          <div id="preview-pane" class="preview hidden markdown-body"></div>
+        <div class="nb-pane nb-read">
+          <article id="prev" class="nb-prev" aria-label="预览"></article>
+          <p class="nb-prev-empty" id="prevEmpty" hidden>还没有内容，随便写一句试试。</p>
         </div>
+      </div>
+
+      <div class="nb-status">
+        <span id="stat">0 字 · 1 行</span>
+        <span class="nb-usage" id="usage" title="笔记占用的浏览器存储空间（上限约 5MB），满了会存不下，记得备份 JSON"></span>
+        <span class="nb-hint">⌘/Ctrl + S 保存 · Tab 缩进 · 本地自动保存 + GitHub 云同步</span>
       </div>
     </section>
-  </main>
-</div>
+  </section>
 
-<!-- ===== 设置弹窗 ===== -->
-<div id="settings-modal" class="modal-mask hidden">
-  <div class="modal">
-    <h3>⚙️ 设置</h3>
-    <label>GitHub Personal Access Token（保存笔记用，仅存在本机）</label>
-    <input type="password" id="pat-input" placeholder="github_pat_… 或 ghp_…">
-    <p class="modal-tip">
-      生成方法：GitHub → Settings → Developer settings → Fine-grained tokens，
-      只授权 <b>MYMD</b> 这一个仓库，权限勾选 <b>Contents: Read and write</b>。
-    </p>
-    <div class="modal-actions">
-      <button id="settings-cancel" class="btn btn-ghost">取消</button>
-      <button id="settings-save" class="btn btn-primary">保存</button>
+  <p class="nb-toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+  <div class="nb-qr" id="qrPanel" hidden>
+    <div class="nb-qr-card" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+      <h2 id="qrTitle">手机上打开</h2>
+      <div class="nb-qr-code" id="qrCode"></div>
+      <p class="nb-qr-url" id="qrUrl"></p>
+      <p class="nb-qr-tip">手机扫一下就在手机上打开同一页。配好 GitHub Token 后笔记会自动双向同步，手机电脑看到的是同一份。</p>
+      <div class="nb-qr-foot">
+        <button class="btn" id="qrClose" type="button">关闭</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- ===== 设置（GitHub Token） ===== -->
+  <div class="nb-qr" id="cfgPanel" hidden>
+    <div class="nb-qr-card" role="dialog" aria-modal="true" aria-labelledby="cfgTitle">
+      <h2 id="cfgTitle">⚙️ GitHub 同步设置</h2>
+      <label class="cfg-label" for="patInput">Personal Access Token（仅保存在本机浏览器）</label>
+      <input type="password" id="patInput" class="cfg-input" placeholder="github_pat_… 或 ghp_…" autocomplete="off">
+      <p class="nb-qr-tip">
+        生成方法：GitHub → Settings → Developer settings → Fine-grained tokens，
+        只授权 <b id="cfgRepoName"></b> 仓库、权限勾选 <b>Contents: Read and write</b>。
+        配好后笔记自动双向同步；没配也不影响本地使用。
+      </p>
+      <div class="nb-qr-foot">
+        <button class="btn" id="cfgClose" type="button">关闭</button>
+        <button class="btn btn-primary" id="cfgSave" type="button">保存并同步</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="facts" aria-label="处理方式">
+    <article class="fact"><h2>本地自动保存</h2><p>笔记写进浏览器的本地存储，每敲一句都在存，关掉再开还在。没有账号，清理浏览器站点数据前记得「备份 JSON」或确认已同步到 GitHub。</p></article>
+    <article class="fact"><h2>一键同步到 GitHub</h2><p>在 ⚙️ 里填入你自己的 Fine-grained Token（只授权这一个仓库），笔记就会以明文 .md 存进你仓库的 notes/ 目录，双向同步、自带版本历史；换设备、手机扫码打开都是同一份。</p></article>
+    <article class="fact"><h2>打开就是 .md</h2><p>导出的就是纯文本 Markdown，不夹带样式和内嵌数据。Obsidian、Typora、VS Code、GitHub 都能直接打开，也能再导入回来接着改。</p></article>
+  </section>
+</main>
+
+<footer>
+  <p>MYMD · 零依赖 Markdown 笔记本，本地保存 + GitHub 云同步 · <a href="https://github.com/httcup/mymd">GitHub 源码</a> · 更多工具见 <a href="https://139t.cn/">小胡的工具箱</a></p>
+</footer>
 
 <script src="config.js"></script>
+<script src="markdown.js"></script>
+<script src="qr.js"></script>
 <script src="app.js"></script>
+<script src="cloud.js"></script>
 </body>
 </html>
