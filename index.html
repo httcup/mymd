@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>MYMD · 我的笔记</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+</head>
+<body>
+
+<!-- ===== 密码门 ===== -->
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <div class="gate-logo">📝</div>
+    <h1>MYMD</h1>
+    <p class="gate-sub">私人笔记 · 输入密码进入</p>
+    <input type="password" id="gate-pwd" placeholder="密码" autocomplete="current-password">
+    <button id="gate-btn" class="btn btn-primary">解锁</button>
+    <p id="gate-err" class="gate-err"></p>
+  </div>
+</div>
+
+<!-- ===== 主界面 ===== -->
+<div id="app" class="app hidden">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="logo">📝 MYMD</span>
+    </div>
+    <div class="topbar-right">
+      <span id="save-status" class="save-status"></span>
+      <button id="btn-new" class="btn btn-primary">＋ 新笔记</button>
+      <button id="btn-settings" class="btn btn-ghost" title="设置">⚙️</button>
+      <button id="btn-lock" class="btn btn-ghost" title="锁定">🔒</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 侧栏：笔记列表 -->
+    <aside class="sidebar">
+      <div class="sidebar-head">笔记列表</div>
+      <ul id="note-list" class="note-list"></ul>
+      <div id="list-loading" class="list-loading">加载中…</div>
+    </aside>
+
+    <!-- 编辑区 -->
+    <section class="editor-area">
+      <div id="welcome" class="welcome">
+        <h2>欢迎使用 MYMD 👋</h2>
+        <p>笔记以明文 Markdown 保存在你的 GitHub 仓库 <code id="welcome-repo"></code> 的 <code>notes/</code> 目录里。</p>
+        <p>左侧选择一篇笔记，或点右上角「＋ 新笔记」开始写。</p>
+        <p class="welcome-tip">⚠️ 保存到 GitHub 需要先在设置里填入你的 Personal Access Token（仅保存在本机浏览器）。</p>
+      </div>
+
+      <div id="editor" class="editor hidden">
+        <div class="editor-toolbar">
+          <input id="note-title" class="note-title" placeholder="笔记标题">
+          <div class="editor-actions">
+            <button id="btn-preview" class="btn btn-ghost">预览</button>
+            <button id="btn-delete" class="btn btn-ghost" title="删除这篇笔记">🗑️</button>
+            <button id="btn-save" class="btn btn-primary">保存</button>
+          </div>
+        </div>
+        <div class="editor-body">
+          <textarea id="note-content" placeholder="# 开始写作…&#10;&#10;支持 Markdown 语法"></textarea>
+          <div id="preview-pane" class="preview hidden markdown-body"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== 设置弹窗 ===== -->
+<div id="settings-modal" class="modal-mask hidden">
+  <div class="modal">
+    <h3>⚙️ 设置</h3>
+    <label>GitHub Personal Access Token（保存笔记用，仅存在本机）</label>
+    <input type="password" id="pat-input" placeholder="github_pat_… 或 ghp_…">
+    <p class="modal-tip">
+      生成方法：GitHub → Settings → Developer settings → Fine-grained tokens，
+      只授权 <b>MYMD</b> 这一个仓库，权限勾选 <b>Contents: Read and write</b>。
+    </p>
+    <div class="modal-actions">
+      <button id="settings-cancel" class="btn btn-ghost">取消</button>
+      <button id="settings-save" class="btn btn-primary">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
