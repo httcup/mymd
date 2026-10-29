@@ -294,7 +294,8 @@
   }
 
   function tryUnlock() {
-    var pwd = $('gatePwd').value;
+    /* 中文输入法可能打出全角空格（U+3000），统一按普通空格处理 */
+    var pwd = $('gatePwd').value.replace(/\u3000/g, ' ');
     if (!pwd) return;
     sha256Hex(pwd).then(function (hash) {
       if (hash === CONFIG.passwordHash) {

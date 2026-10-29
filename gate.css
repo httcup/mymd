@@ -68,3 +68,6 @@
 
 /* 云同步状态文字 */
 #cloudState { color: #2563eb; }
+
+/* 解锁后隐藏密码门（.hidden 类由 JS 添加） */
+#gate.hidden { display: none !important; }
